@@ -5,10 +5,8 @@
 .bar-wrap { flex: 1; background: #f1f1ef; border-radius: 4px; height: 22px; overflow: hidden; }
 .bar { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 500; white-space: nowrap; transition: width 0.4s ease; }
 .country-label { width: 74px; font-size: 13px; color: #787774; text-align: right; flex-shrink: 0; }
-.tier-badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; flex-shrink: 0; }
 .note-row { font-size: 12px; color: #787774; margin-top: 4px; line-height: 1.5; }
 .section-title { font-size: 12px; font-weight: 500; color: #787774; text-transform: uppercase; letter-spacing: 0.05em; margin: 18px 0 10px; }
-.source-note { font-size: 11px; color: #b0aeab; margin-top: 18px; line-height: 1.6; padding-top: 12px; border-top: 1px solid #f1f1ef; }
 </style>
 
 <div style="padding: 4px 0 0;">
@@ -27,76 +25,59 @@ const COLORS = {
   mid:  '#BA7517',
   low:  '#D85A30'
 };
-const TIER_STYLE = {
-  '★★★': { bg: '#E1F5EE', color: '#0F6E56' },
-  '★★☆': { bg: '#FAEEDA', color: '#633806' },
-  '★☆☆': { bg: '#FAECE7', color: '#993C1D' }
-};
 
 const roles = {
   eng: {
-    title: 'Frontend engineer (React/TypeScript)',
     poolSize: '~2M React/TS developers est. across Europe',
     source: 'Eurostat 2024 (6.1M total EU devs); devjobsscanner.com (React = ~40% of frontend job postings); JetBrains 2024 (80% of React devs use TypeScript); Accent on People 2024 (country-level totals)',
-    disclaimer: 'React/TS figures are derived estimates, not direct headcounts. Total developer pool used as base; React share (~40%) and TypeScript adoption (~80% of React devs) applied as multipliers. Actual pool of developers actively open to roles will be smaller.',
-    summary: 'UK and Germany dominate absolute pool size. Spain growing fast, France solid, Italy and Portugal smaller but genuine.',
+    disclaimer: 'React/TS figures are derived estimates, not direct headcounts. Total developer pool used as base; React share (~40%) and TypeScript adoption (~80% of React devs) applied as multipliers. Actual pool of developers actively open to roles will be smaller. Notable pools outside scope: Poland (~160k est.), Ukraine (~120k+ est.), Netherlands (~95k est.), Sweden (~70k est.), Romania (~65k est.).',
     countries: [
-      { name: 'UK',       score: 95, label: '~320k React/TS est.', tier: '★★★', note: 'Largest English-speaking pool in Europe (~840k total devs; Accent on People 2024). Dense in London. Strong React ecosystem. Most active on LinkedIn. High competition = higher comp.' },
-      { name: 'Germany',  score: 92, label: '~380k React/TS est.', tier: '★★★', note: 'Largest absolute dev pool in the EU (~1M total devs; Accent on People / Eurostat 2024). Berlin and Munich are React/TS hubs. German-language barrier for some roles. Compensation pressure rising.' },
-      { name: 'France',   score: 72, label: '~190k React/TS est.', tier: '★★☆', note: '~533k total software developers (Accent on People 2024). Paris tech scene strong. Good engineering schools (42, EPFL grads). Historically underrepresented on LinkedIn vs actual size. Angular retains stronger-than-average share vs React in French job postings.' },
-      { name: 'Spain',    score: 68, label: '~120k React/TS est.', tier: '★★☆', note: '~333k+ total software developers (tech sector census 2024). Barcelona and Madrid growing fast. Spain accounted for 5.6% of global dev hires in 2024. 41-52% of firms struggle to find talent = competitive market.' },
-      { name: 'Italy',    score: 48, label: '~90k React/TS est.', tier: '★★☆', note: '~250k total software developers est. (Eurostat: Italy holds 9.2% of EU\'s 10M ICT specialists; devs ~25-30% of that). Milan primary hub. LinkedIn penetration lower. React/TS talent exists but pool thinner at senior level.' },
-      { name: 'Portugal', score: 38, label: '~45k React/TS est.', tier: '★☆☆', note: '~120k total IT specialists (N-IX / Intellias 2024; Eurostat notes 230k total ICT specialists, devs a subset). Lisbon a rising SaaS hub. Pool small but talent is active and internationally oriented. 56-65% of firms report shortages — tight market.' }
-    ],
-    restOfEurope: 'Largest React/TS pools outside Photoroom countries: Poland (~160k est.), Netherlands (~95k est.), Romania (~65k est.), Sweden (~70k est.), Ukraine (~120k+ est.). Not in scope but worth tracking as future exceptions.'
+      { name: 'UK',       score: 95, pool: '~320k', pct: '~16% of EU', color_score: 95, note: 'Concentrated in London.' },
+      { name: 'Germany',  score: 92, pool: '~380k', pct: '~19% of EU', color_score: 92, note: 'Berlin and Munich are the primary hubs.' },
+      { name: 'France',   score: 72, pool: '~190k', pct: '~10% of EU', color_score: 72, note: 'Concentrated in Paris.' },
+      { name: 'Spain',    score: 68, pool: '~120k', pct: '~6% of EU',  color_score: 68, note: 'Barcelona and Madrid, with Barcelona ahead.' },
+      { name: 'Italy',    score: 48, pool: '~90k',  pct: '~5% of EU',  color_score: 48, note: 'Milan is the primary hub.' },
+      { name: 'Portugal', score: 38, pool: '~45k',  pct: '~2% of EU',  color_score: 38, note: 'Concentrated in Lisbon.' }
+    ]
   },
   pm: {
-    title: 'Product manager',
     poolSize: '~520–650k PMs est. across Europe',
     source: 'LinkedIn global PM count (2.6M profiles, 2024); PM Job Market Insights 2024 (EU country share of open roles); LinkedIn EU job listings (~42k active PM roles, early 2025); Ravio compensation benchmarks 2025',
-    disclaimer: 'No public headcount dataset for PMs by country exists. European pool derived by applying Europe\'s ~20-25% share of LinkedIn\'s global PM count. Country estimates use each market\'s share of EU open PM roles as a proxy for talent distribution — a known approximation.',
-    summary: 'PM talent clusters more tightly than engineering. London is the clear dominant hub, followed by Paris and Berlin. Southern Europe lags significantly.',
+    disclaimer: 'No public headcount dataset for PMs by country exists. European pool derived by applying Europe\'s ~20-25% share of LinkedIn\'s global PM count. Country estimates use each market\'s share of EU open PM roles as a proxy for talent distribution — a known approximation. Notable pools outside scope: Netherlands (Amsterdam, ~20-35k est.) and Sweden (Stockholm, ~20-35k est.) with outsized PM talent relative to country size.',
     countries: [
-      { name: 'UK',       score: 95, label: '~130–160k PMs est.', tier: '★★★', note: 'UK holds ~25% of European PM talent, concentrated in London. Dense fintech, SaaS and consumer tech scenes generate career PMs. English fluency advantage. High comp expectations (avg £67k base, Ravio 2025).' },
-      { name: 'Germany',  score: 78, label: '~65–85k PMs est.', tier: '★★★', note: '~13% of EU PM job openings (PM Job Market Insights 2024). Berlin and Munich strong. PM culture maturing but still more engineering-led than UK/US. Growing pipeline from scaleups (Zalando, Delivery Hero, etc.). Avg PM base ~€71.5k (Ravio 2025).' },
-      { name: 'France',   score: 70, label: '~55–70k PMs est.', tier: '★★☆', note: '~13% of EU PM job openings (PM Job Market Insights 2024). Paris tech ecosystem (Doctolib, Ledger, Contentsquare alumni) growing PM talent supply. Avg PM base ~€63.7k (Ravio 2025). Language can be a barrier for English-first companies.' },
-      { name: 'Spain',    score: 52, label: '~30–45k PMs est.', tier: '★★☆', note: '~7-8% of EU PM job openings. Barcelona ahead of Madrid. Avg PM base ~€54k (Ravio 2025). English proficiency varies. Fewer PM alumni networks than UK/DE/FR. Market improving but still emerging.' },
-      { name: 'Italy',    score: 38, label: '~20–30k PMs est.', tier: '★☆☆', note: '~5% of EU PM job openings. Milan has the most. Limited English-first PM culture. Senior PMs with SaaS experience relatively scarce. Expect longer time-to-fill.' },
-      { name: 'Portugal', score: 28, label: '~6–10k PMs est.', tier: '★☆☆', note: '~1% of EU PM job openings (PM Job Market Insights 2024). Lisbon growing as a startup hub but PM talent pipeline is nascent. Many senior PMs are expats. Small domestic senior talent base.' }
-    ],
-    restOfEurope: 'Netherlands (Amsterdam) and Sweden (Stockholm) have outsized PM talent relative to country size — significant SaaS PM alumni networks. Each estimated at ~20-35k PMs. Worth monitoring for exceptions.'
+      { name: 'UK',       score: 95, pool: '~130–160k', pct: '~25% of EU', color_score: 95, note: 'Concentrated in London.' },
+      { name: 'Germany',  score: 78, pool: '~65–85k',   pct: '~13% of EU', color_score: 78, note: 'Berlin and Munich are the primary hubs.' },
+      { name: 'France',   score: 70, pool: '~55–70k',   pct: '~11% of EU', color_score: 70, note: 'Concentrated in Paris.' },
+      { name: 'Spain',    score: 52, pool: '~30–45k',   pct: '~7% of EU',  color_score: 52, note: 'Barcelona ahead of Madrid.' },
+      { name: 'Italy',    score: 38, pool: '~20–30k',   pct: '~5% of EU',  color_score: 38, note: 'Milan is the primary hub.' },
+      { name: 'Portugal', score: 28, pool: '~6–10k',    pct: '~1% of EU',  color_score: 28, note: 'Concentrated in Lisbon.' }
+    ]
   },
   pd: {
-    title: 'Product designer',
     poolSize: '~150–250k product/UX designers est. across Europe',
     source: 'Glassdoor May 2024 (open PD role counts by country); Eurostat 2024 ICT workforce ratios (used to estimate relative pool sizes where direct counts unavailable); QS World University Rankings by Subject 2024 (design school density)',
-    disclaimer: 'No public headcount dataset exists for product designers specifically. Pool estimates triangulated from open-role counts, ICT workforce share, and LinkedIn penetration data. Open-role counts are not included in bar labels as they reflect demand, not supply.',
-    summary: 'Design talent concentrates in the same cities as PM. UK leads, with Germany and the Netherlands close behind. Spain is improving with 6 universities in the QS design top 250.',
+    disclaimer: 'No public headcount dataset exists for product designers specifically. Pool estimates triangulated from open-role counts, ICT workforce share, and LinkedIn penetration data. Open-role counts reflect demand, not supply, and are not used as pool proxies. Notable pools outside scope: Netherlands (Amsterdam) and Sweden/Denmark each estimated at 15-25k — outsized relative to country size.',
     countries: [
-      { name: 'UK',       score: 92, label: '~45–65k PD est.', tier: '★★★', note: 'Highest open PD role count in Europe (Glassdoor 2024). London is a global design hub, especially for fintech and digital product. Strong agency-to-in-house pipeline. Salary expectations premium vs rest of Europe (avg £53–70k).' },
-      { name: 'Germany',  score: 80, label: '~40–55k PD est.', tier: '★★★', note: 'Second highest open PD count in Europe (Glassdoor 2024). Berlin a recognised design hub. High demand from incumbents and scaleups. Talent density growing. Avg salary ~$56k USD (2024). Salaries rising particularly in senior roles.' },
-      { name: 'France',   score: 65, label: '~30–45k PD est.', tier: '★★☆', note: 'Paris strong in brand and digital product design. Active community but smaller than UK/DE. LinkedIn penetration lower than actual market size suggests. Estimated 3rd largest EU design pool.' },
-      { name: 'Spain',    score: 62, label: '~25–35k PD est.', tier: '★★☆', note: '800k+ citizens with ICT skills; 6 design schools in QS top 250. Barcelona stronger than Madrid. Market growing — positive economic indicators for tech in 2024-25. Avg salary ~$33k USD, making it competitively priced for hiring.' },
-      { name: 'Italy',    score: 45, label: '~18–28k PD est.', tier: '★★☆', note: 'Milan has design history but product design (vs brand/graphic) is less developed. Growing number of product design bootcamp graduates improving pipeline. Pool estimated smaller than Spain\'s based on ICT workforce ratios (Italy = 9.2% of EU ICT vs Spain = 10%).' },
-      { name: 'Portugal', score: 30, label: '~6–12k PD est.', tier: '★☆☆', note: 'Active design community in Lisbon but small. Many designers are generalists rather than product specialists. Senior product designers often expats. Pipeline improving for junior roles; senior talent remains thin.' }
-    ],
-    restOfEurope: 'Netherlands (Amsterdam) punches well above its weight in UX/product design. Sweden and Denmark also strong — each estimated at 15-25k product designers. Worth considering if a design-specific exception arises.'
+      { name: 'UK',       score: 92, pool: '~45–65k', pct: '~27% of EU', color_score: 92, note: 'Concentrated in London.' },
+      { name: 'Germany',  score: 80, pool: '~40–55k', pct: '~23% of EU', color_score: 80, note: 'Berlin is the primary hub.' },
+      { name: 'France',   score: 65, pool: '~30–45k', pct: '~19% of EU', color_score: 65, note: 'Concentrated in Paris.' },
+      { name: 'Spain',    score: 62, pool: '~25–35k', pct: '~15% of EU', color_score: 62, note: 'Barcelona stronger than Madrid.' },
+      { name: 'Italy',    score: 45, pool: '~18–28k', pct: '~12% of EU', color_score: 45, note: 'Milan is the primary hub.' },
+      { name: 'Portugal', score: 30, pool: '~6–12k',  pct: '~4% of EU',  color_score: 30, note: 'Concentrated in Lisbon.' }
+    ]
   },
   ae: {
-    title: 'Account executive (B2B SaaS)',
-    poolSize: 'B2B SaaS AE pool not publicly quantified — UK + DE account for est. 50%+ of quality supply',
+    poolSize: 'B2B SaaS AE pool not publicly quantified — percentages reflect estimated share of European quality supply',
     source: 'Bluebird Recruitment 2025 SaaS Salary Benchmarks; Nobel Recruitment GTM Talent Search 2025; LinkedIn SaaS job opening distribution; Ravio compensation benchmarks 2025',
-    disclaimer: 'No public headcount dataset exists for B2B SaaS AEs by country. Relative rankings derived from SaaS ecosystem density, scaleup alumni base size, and specialist recruitment agency market coverage. Treat as directional, not quantitative.',
-    summary: 'Sales talent is the most geographically concentrated of all four roles — English fluency, SaaS culture and market maturity matter enormously. UK is dominant, Germany rising.',
+    disclaimer: 'No public headcount dataset exists for B2B SaaS AEs by country. Relative rankings derived from SaaS ecosystem density, scaleup alumni base size, and specialist recruitment agency market coverage. Treat as directional, not quantitative. Notable pools outside scope: Netherlands (Amsterdam) and Ireland (Dublin) — disproportionately large SaaS AE pools due to major US SaaS HQ presence (Salesforce, HubSpot, Google).',
     countries: [
-      { name: 'UK',       score: 98, label: 'est. 40–50% of EU supply', tier: '★★★', note: 'London is the B2B SaaS sales capital of Europe. Deep bench of enterprise AEs from Salesforce, HubSpot, etc. English fluency. Highest OTE expectations but matching talent density. UK + Ireland together represent the largest SaaS AE pool in Europe by a significant margin (Bluebird 2025).' },
-      { name: 'Germany',  score: 80, label: 'est. 15–20% of EU supply', tier: '★★★', note: 'Berlin and Munich seeing sharp rise in AE comp and supply (Bluebird 2025). DACH market experience valuable. Language split: some AEs cover DACH, others English-only. Growing scaleup alumni base (Personio, Celonis, GetYourGuide).' },
-      { name: 'France',   score: 62, label: 'est. 10–15% of EU supply', tier: '★★☆', note: 'Paris SaaS scene (Salesforce, HubSpot offices) creating pipeline. Mostly covers French-speaking markets. English-first SaaS AEs exist but narrower pool. Market recovering after 2023-24 SaaS hiring slowdown.' },
-      { name: 'Spain',    score: 50, label: 'est. 8–12% of EU supply', tier: '★★☆', note: 'Barcelona and Madrid growing. SaaS culture developing. Best for EMEA-South coverage roles. Comp lower = more accessible (avg OTE ~€54k vs UK avg £95k+). 41-52% of firms struggle to hire.' },
-      { name: 'Italy',    score: 32, label: 'est. 4–6% of EU supply', tier: '★☆☆', note: 'Milan primary market. Limited B2B SaaS AE pipeline vs market size. Most experienced AEs are from US company local offices (Salesforce, Oracle). Senior B2B SaaS closers with modern SaaS backgrounds are rare.' },
-      { name: 'Portugal', score: 25, label: 'est. 2–4% of EU supply', tier: '★☆☆', note: 'Lisbon growing as EU SaaS hub for US companies (Volkswagen Digital Hub, Sword Health, etc.), but AE talent is mostly expat or entry-level. Senior B2B SaaS closers are rare. High risk of long time-to-fill for experienced roles.' }
-    ],
-    restOfEurope: 'Netherlands (Amsterdam) and Ireland (Dublin) have disproportionately large SaaS AE pools given country size — major US SaaS HQs (Salesforce, HubSpot, Google) based there. Strong exception candidates for senior AE hires.'
+      { name: 'UK',       score: 98, pool: null, pct: '~40–50% of EU', color_score: 98, note: 'Concentrated in London.' },
+      { name: 'Germany',  score: 80, pool: null, pct: '~15–20% of EU', color_score: 80, note: 'Berlin and Munich are the primary hubs.' },
+      { name: 'France',   score: 62, pool: null, pct: '~10–15% of EU', color_score: 62, note: 'Concentrated in Paris.' },
+      { name: 'Spain',    score: 50, pool: null, pct: '~8–12% of EU',  color_score: 50, note: 'Barcelona and Madrid.' },
+      { name: 'Italy',    score: 32, pool: null, pct: '~4–6% of EU',   color_score: 32, note: 'Milan is the primary hub.' },
+      { name: 'Portugal', score: 25, pool: null, pct: '~2–4% of EU',   color_score: 25, note: 'Concentrated in Lisbon.' }
+    ]
   }
 };
 
@@ -106,31 +87,26 @@ function showRole(key) {
 
   const r = roles[key];
   const maxScore = Math.max(...r.countries.map(c => c.score));
+
   let html = `<div style="font-size:13px;color:#5a5a5a;background:#f8f8f7;border-radius:6px;padding:10px 14px;margin-bottom:16px;line-height:1.7">
     <div style="margin-bottom:4px"><strong style="color:#3a3a3a">Estimated pool size:</strong> ${r.poolSize}</div>
     <div style="margin-bottom:4px"><strong style="color:#3a3a3a">Sources:</strong> ${r.source}</div>
     <div><strong style="color:#3a3a3a">Disclaimer:</strong> ${r.disclaimer}</div>
   </div>`;
-  html += `<div style="font-size:13px;color:#5a5a5a;margin-bottom:16px;line-height:1.6">${r.summary}</div>`;
 
   html += `<div class="section-title">Talent pool depth — Photoroom core markets</div>`;
   r.countries.forEach(c => {
     const pct = (c.score / maxScore * 100).toFixed(0);
     const color = c.score >= 70 ? COLORS.high : c.score >= 45 ? COLORS.mid : COLORS.low;
-    const ts = TIER_STYLE[c.tier];
+    const label = c.pool ? `${c.pool} · ${c.pct}` : c.pct;
     html += `<div class="country-row">
       <span class="country-label">${c.name}</span>
       <div class="bar-wrap">
-        <div class="bar" style="width:${pct}%;background:${color}20;color:${color};">${c.label}</div>
+        <div class="bar" style="width:${pct}%;background:${color}20;color:${color};">${label}</div>
       </div>
-      <span class="tier-badge" style="background:${ts.bg};color:${ts.color}">${c.tier}</span>
     </div>
     <div class="note-row" style="margin-left:84px;margin-bottom:10px">${c.note}</div>`;
   });
-
-  html += `<div class="section-title">Rest of Europe — context</div>`;
-  html += `<div style="font-size:13px;color:#5a5a5a;line-height:1.6;padding:10px 12px;background:#f1f1ef;border-radius:6px">${r.restOfEurope}</div>`;
-
 
   document.getElementById('role-content').innerHTML = html;
 }
