@@ -1,116 +1,232 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font-sans);font-size:13px;color:var(--color-text-primary);padding:20px;line-height:1.5}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-.tab-btn{padding:8px 16px;font-size:13px;font-weight:500;color:var(--color-text-secondary);background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);border-radius:8px;cursor:pointer;transition:all .15s;white-space:nowrap}
-.tab-btn:hover{background:var(--color-background-tertiary);color:var(--color-text-primary)}
-.tab-btn.active{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary)}
-.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;font-size:12px;color:var(--color-text-secondary)}
-.legend-item{display:flex;align-items:center;gap:5px}
-.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
-.chart-grid{display:flex;flex-direction:column;gap:14px}
-.country-row{display:flex;align-items:center;gap:12px}
-.country-label{width:60px;font-size:12px;font-weight:500;color:var(--color-text-primary);flex-shrink:0;text-align:right}
-.bar-wrap{flex:1;display:flex;height:32px;border-radius:6px;overflow:hidden;background:var(--color-background-secondary)}
-.seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;transition:width .4s ease;overflow:hidden;white-space:nowrap}
-.seg-label{padding:0 4px;pointer-events:none}
-.total-label{width:50px;font-size:12px;color:var(--color-text-secondary);flex-shrink:0}
-.section-label{font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:12px}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+    font-size: 13px;
+    color: #18181b;
+    background: #fff;
+    padding: 20px;
+    line-height: 1.5;
+  }
+
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+  .tab-btn {
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #52525b;
+    background: #f4f4f5;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { background: #e4e4e7; color: #27272a; }
+  .tab-btn.active { background: #18181b; color: #fff; border-color: #18181b; }
+
+  .legend {
+    display: flex; gap: 18px; flex-wrap: wrap;
+    margin-bottom: 20px; font-size: 12px; color: #52525b;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; }
+
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+    text-transform: uppercase; color: #a1a1aa; margin-bottom: 14px;
+  }
+
+  .chart-grid { display: flex; flex-direction: column; gap: 10px; }
+
+  .country-row { display: flex; align-items: center; gap: 0; }
+
+  .country-label {
+    width: 72px; font-size: 12.5px; font-weight: 600;
+    color: #27272a; flex-shrink: 0; text-align: right; padding-right: 12px;
+  }
+
+  /* The diverging area: left half = engaged (converted+replied), right half = contacted */
+  .bar-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+
+  /* Left side: grows rightward from center anchor toward left */
+  .left-side {
+    display: flex;
+    flex-direction: row-reverse; /* rightmost segment is closest to center */
+    align-items: center;
+    width: 50%;
+    justify-content: flex-start;
+  }
+
+  /* Right side: grows rightward from center anchor */
+  .right-side {
+    display: flex;
+    align-items: center;
+    width: 50%;
+  }
+
+  .seg {
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #fff;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: width 0.4s ease;
+  }
+  .seg-label { padding: 0 5px; pointer-events: none; }
+
+  /* Center divider line */
+  .divider {
+    width: 1.5px;
+    height: 34px;
+    background: #e4e4e7;
+    flex-shrink: 0;
+    z-index: 1;
+  }
+
+  .total-label {
+    width: 46px; font-size: 12px; color: #a1a1aa;
+    flex-shrink: 0; text-align: right; padding-left: 10px;
+  }
 </style>
+</head>
+<body>
 
 <div class="tabs" id="tabs"></div>
+
 <div class="legend">
-  <div class="legend-item"><div class="legend-dot" style="background:#71717a"></div>Contacted</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#f43f5e"></div>Converted</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Replied</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#a1a1aa"></div>Other</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ec4899"></div>Converted</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div>Replied</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#818cf8"></div>Contacted</div>
 </div>
-<div class="section-label">Reply rates per country</div>
+
+<div class="section-label">Reply rates per country — aligned at contacted boundary</div>
 <div class="chart-grid" id="chart"></div>
 
 <script>
-const ROLES = [
-  {key:'all', label:'All roles'},
-  {key:'hcv', label:'Head of Computer Vision'},
-  {key:'fe',  label:'Frontend engineer'},
-  {key:'pd',  label:'Product designer'},
-  {key:'as',  label:'Applied scientist'},
+var ROLES = [
+  { key: 'all', label: 'All roles' },
+  { key: 'hcv', label: 'Head of Computer Vision' },
+  { key: 'fe',  label: 'Frontend engineer' },
+  { key: 'pd',  label: 'Product designer' },
+  { key: 'as',  label: 'Applied scientist' },
 ];
 
-const DATA = {
+// contacted = original contacted + other merged in
+// For diverging chart: left side = converted + replied (engagement), right side = contacted
+var DATA = {
   all: [
-    {country:'France',  total:348,  contacted:64.7, converted:20.1, replied:13.8, other:1.4},
-    {country:'Germany', total:403,  contacted:56.3, converted:24.8, replied:18.1, other:0.7},
-    {country:'Spain',   total:180,  contacted:50.0, converted:29.4, replied:20.6, other:0},
-    {country:'UK',      total:1044, contacted:71.6, converted:13.9, replied:13.4, other:1.1},
+    { country: 'France',  total: 348,  converted: 20.1, replied: 13.8, contacted: 66.1 },
+    { country: 'Germany', total: 403,  converted: 24.8, replied: 18.1, contacted: 57.1 },
+    { country: 'UK',      total: 1044, converted: 13.9, replied: 13.4, contacted: 72.7 },
   ],
   hcv: [
-    {country:'France',  total:67,  contacted:44.8, converted:31.3, replied:16.4, other:7.5},
-    {country:'Germany', total:64,  contacted:50.0, converted:26.6, replied:18.8, other:4.7},
-    {country:'Spain',   total:17,  contacted:47.1, converted:35.3, replied:17.6, other:0},
-    {country:'UK',      total:305, contacted:73.8, converted:8.9,  replied:15.1, other:2.3},
+    { country: 'France',  total: 67,  converted: 31.3, replied: 16.4, contacted: 52.3 },
+    { country: 'Germany', total: 64,  converted: 26.6, replied: 18.8, contacted: 54.7 },
+    { country: 'UK',      total: 305, converted: 8.9,  replied: 15.1, contacted: 76.1 },
   ],
   fe: [
-    {country:'France',  total:38,  contacted:55.3, converted:26.3, replied:18.4, other:0},
-    {country:'Germany', total:132, contacted:51.5, converted:28.8, replied:19.7, other:0},
-    {country:'Spain',   total:65,  contacted:61.5, converted:21.5, replied:16.9, other:0},
-    {country:'UK',      total:161, contacted:62.7, converted:20.5, replied:14.3, other:2.5},
+    { country: 'France',  total: 38,  converted: 26.3, replied: 18.4, contacted: 55.3 },
+    { country: 'Germany', total: 132, converted: 28.8, replied: 19.7, contacted: 51.5 },
+    { country: 'UK',      total: 161, converted: 20.5, replied: 14.3, contacted: 65.2 },
   ],
   pd: [
-    {country:'France',  total:13,  contacted:76.9, converted:23.1, replied:0, other:0},
-    {country:'Germany', total:49,  contacted:30.6, converted:36.7, replied:0, other:32.7},
-    {country:'Spain',   total:52,  contacted:40.4, converted:26.9, replied:0, other:32.7},
-    {country:'UK',      total:117, contacted:67.5, converted:21.4, replied:0, other:11.1},
+    { country: 'France',  total: 13,  converted: 23.1, replied: 0,    contacted: 76.9 },
+    { country: 'Germany', total: 49,  converted: 36.7, replied: 32.7, contacted: 30.6 },
+    { country: 'UK',      total: 117, converted: 21.4, replied: 11.1, contacted: 67.5 },
   ],
   as: [
-    {country:'France',  total:230, contacted:71.3, converted:17.0, replied:11.7, other:0},
-    {country:'Germany', total:158, contacted:70.9, converted:18.4, replied:10.8, other:0},
-    {country:'Spain',   total:46,  contacted:45.7, converted:34.8, replied:19.6, other:0},
-    {country:'UK',      total:461, contacted:74.4, converted:15.6, replied:10.0, other:0},
+    { country: 'France',  total: 230, converted: 17.0, replied: 11.7, contacted: 71.3 },
+    { country: 'Germany', total: 158, converted: 18.4, replied: 10.8, contacted: 70.9 },
+    { country: 'UK',      total: 461, converted: 15.6, replied: 10.0, contacted: 74.4 },
   ],
 };
 
-const COLORS = {
-  contacted:'#71717a',
-  converted:'#f43f5e',
-  replied:'#f59e0b',
-  other:'#a1a1aa',
-};
-
-let active = 'all';
-
-function render(key) {
-  active = key;
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.key === key));
-  const rows = DATA[key];
-  const chart = document.getElementById('chart');
-  chart.innerHTML = rows.map(r => {
-    const segs = ['contacted','converted','replied','other']
-      .map(s => {
-        const pct = r[s];
-        if (!pct) return '';
-        const minW = pct < 8 ? 0 : 1;
-        const label = pct >= 8 ? `<span class="seg-label">${pct}%</span>` : '';
-        return `<div class="seg" style="width:${pct}%;background:${COLORS[s]};color:#fff;min-width:${minW}px">${label}</div>`;
-      }).join('');
-    return `<div class="country-row">
-      <div class="country-label">${r.country}</div>
-      <div class="bar-wrap">${segs}</div>
-      <div class="total-label">${r.total.toLocaleString()}</div>
-    </div>`;
-  }).join('');
+// Max engaged (converted+replied) across all data — used to size the left half consistently
+function maxEngaged(rows) {
+  var m = 0;
+  for (var i = 0; i < rows.length; i++) {
+    var e = rows[i].converted + rows[i].replied;
+    if (e > m) m = e;
+  }
+  return m;
 }
 
-const tabsEl = document.getElementById('tabs');
-ROLES.forEach(r => {
-  const b = document.createElement('button');
-  b.className = 'tab-btn';
-  b.dataset.key = r.key;
-  b.textContent = r.label;
-  b.onclick = () => render(r.key);
-  tabsEl.appendChild(b);
-});
+function seg(pct, halfWidth, maxPct, color) {
+  if (!pct) return '';
+  // width as % of the half container
+  var w = (pct / maxPct) * 100;
+  var label = pct >= 6 ? '<span class="seg-label">' + pct + '%</span>' : '';
+  return '<div class="seg" style="width:' + w + '%;background:' + color + ';max-width:100%">' + label + '</div>';
+}
+
+function render(key) {
+  var buttons = document.querySelectorAll('.tab-btn');
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].className = buttons[i].dataset.key === key ? 'tab-btn active' : 'tab-btn';
+  }
+
+  var rows = DATA[key];
+
+  // Normalize so contacted always fills its half (100%), left half scales relative to max engaged
+  var maxE = maxEngaged(rows);
+  // Round up to nearest 10 for a clean scale
+  var leftScale = Math.ceil(maxE / 10) * 10;
+
+  var html = '';
+  for (var r = 0; r < rows.length; r++) {
+    var d = rows[r];
+
+    // Left side: replied (outer) + converted (inner, closest to center)
+    // row-reverse means first child is rightmost (closest to divider)
+    var leftHTML = seg(d.converted, 50, leftScale, '#ec4899')
+                 + seg(d.replied,   50, leftScale, '#f97316');
+
+    // Right side: contacted grows right from divider
+    var rightHTML = '<div class="seg" style="width:' + Math.min(d.contacted, 100) + '%;background:#818cf8;max-width:100%">'
+      + (d.contacted >= 8 ? '<span class="seg-label">' + d.contacted + '%</span>' : '')
+      + '</div>';
+
+    html += '<div class="country-row">'
+      + '<div class="country-label">' + d.country + '</div>'
+      + '<div class="bar-area">'
+        + '<div class="left-side">' + leftHTML + '</div>'
+        + '<div class="divider"></div>'
+        + '<div class="right-side">' + rightHTML + '</div>'
+      + '</div>'
+      + '<div class="total-label">' + d.total.toLocaleString() + '</div>'
+      + '</div>';
+  }
+  document.getElementById('chart').innerHTML = html;
+}
+
+var tabsEl = document.getElementById('tabs');
+for (var i = 0; i < ROLES.length; i++) {
+  (function(role) {
+    var btn = document.createElement('button');
+    btn.className = 'tab-btn';
+    btn.dataset.key = role.key;
+    btn.textContent = role.label;
+    btn.onclick = function() { render(role.key); };
+    tabsEl.appendChild(btn);
+  })(ROLES[i]);
+}
 
 render('all');
 </script>
+</body>
+</html>
