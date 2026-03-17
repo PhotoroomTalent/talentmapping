@@ -1,114 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style>
-.tab-btn { background: none; border: 1px solid #e3e2e0; border-radius: 6px; padding: 6px 14px; font-size: 13px; cursor: pointer; color: #5a5a5a; }
-.tab-btn.active { background: #e7f3fb; color: #2383e2; border-color: #b5d4f0; }
-.country-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.bar-wrap { flex: 1; background: #f1f1ef; border-radius: 4px; height: 22px; overflow: hidden; }
-.bar { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 500; white-space: nowrap; transition: width 0.4s ease; }
-.country-label { width: 74px; font-size: 13px; color: #787774; text-align: right; flex-shrink: 0; }
-.note-row { font-size: 12px; color: #787774; margin-top: 4px; line-height: 1.5; }
-.section-title { font-size: 12px; font-weight: 500; color: #787774; text-transform: uppercase; letter-spacing: 0.05em; margin: 18px 0 10px; }
-</style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+    font-size: 13px;
+    color: #18181b;
+    background: #fff;
+    padding: 20px;
+    line-height: 1.5;
+  }
 
-<div style="padding: 4px 0 0;">
-  <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px;">
-    <button class="tab-btn active" onclick="showRole('eng')">Frontend engineer</button>
-    <button class="tab-btn" onclick="showRole('pm')">Product manager</button>
-    <button class="tab-btn" onclick="showRole('pd')">Product designer</button>
-    <button class="tab-btn" onclick="showRole('ae')">Account executive</button>
-  </div>
-  <div id="role-content"></div>
-</div>
+  /* ── Role buttons ── */
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+  .tab-btn {
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #52525b;
+    background: #f4f4f5;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { background: #e4e4e7; color: #27272a; }
+  .tab-btn.active { background: #18181b; color: #fff; border-color: #18181b; }
+
+  /* ── Info card ── */
+  .info-card {
+    background: #fafafa;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    font-size: 12.5px;
+  }
+  .info-row { display: flex; gap: 4px; margin-bottom: 6px; flex-wrap: wrap; }
+  .info-row:last-of-type { margin-bottom: 0; }
+  .info-label { font-weight: 600; color: #3f3f46; flex-shrink: 0; }
+  .info-value { color: #71717a; }
+  .toggle-btn {
+    margin-top: 10px;
+    font-size: 11.5px;
+    color: #a1a1aa;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.15s;
+  }
+  .toggle-btn:hover { color: #71717a; }
+  .disclaimer-row { display: none; }
+  .disclaimer-row.open { display: flex; }
+
+  /* ── Section label ── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #a1a1aa;
+    margin-bottom: 10px;
+  }
+
+  /* ── Country card ── */
+  .country-list { display: flex; flex-direction: column; gap: 8px; }
+  .country-card {
+    border: 1px solid #f4f4f5;
+    border-radius: 8px;
+    padding: 12px 14px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    transition: border-color 0.15s;
+  }
+  .country-card:hover { border-color: #e4e4e7; }
+
+  /* country card internals */
+  .country-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .country-name {
+    font-weight: 600;
+    font-size: 13px;
+    color: #27272a;
+  }
+  .country-nums {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .num-pool {
+    font-size: 15px;
+    font-weight: 700;
+    color: #18181b;
+    letter-spacing: -0.02em;
+  }
+  .badge {
+    font-size: 11.5px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 6px;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+  .badge-green  { background: #f0fdf4; color: #166534; }
+  .badge-amber  { background: #fffbeb; color: #92400e; }
+  .badge-red    { background: #fff1f2; color: #9f1239; }
+
+  .bar-track {
+    width: 100%;
+    height: 4px;
+    background: #f4f4f5;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+    opacity: 0.6;
+  }
+  .country-note {
+    font-size: 11.5px;
+    color: #a1a1aa;
+  }
+</style>
+</head>
+<body>
+
+<div class="tabs" id="tabs"></div>
+<div id="info-card" class="info-card"></div>
+<div class="section-label">Talent pool depth — Photoroom core markets</div>
+<div class="country-list" id="country-list"></div>
 
 <script>
-const COLORS = {
-  high: '#1D9E75',
-  mid:  '#BA7517',
-  low:  '#D85A30'
-};
 
-const roles = {
+const ROLES = [
+  { key: 'eng', label: 'Frontend engineer' },
+  { key: 'pm',  label: 'Product manager' },
+  { key: 'pd',  label: 'Product designer' },
+  { key: 'ae',  label: 'Account executive' },
+];
+
+const data = {
   eng: {
     poolSize: '~2M React/TS developers est. across Europe',
     source: 'Eurostat 2024 (6.1M total EU devs); devjobsscanner.com (React = ~40% of frontend job postings); JetBrains 2024 (80% of React devs use TypeScript); Accent on People 2024 (country-level totals)',
     disclaimer: 'React/TS figures are derived estimates, not direct headcounts. Total developer pool used as base; React share (~40%) and TypeScript adoption (~80% of React devs) applied as multipliers. Actual pool of developers actively open to roles will be smaller. Notable pools outside scope: Poland (~160k est.), Ukraine (~120k+ est.), Netherlands (~95k est.), Sweden (~70k est.), Romania (~65k est.).',
     countries: [
-      { name: 'UK',       score: 95, pool: '~320k', pct: '~16% of EU', color_score: 95, note: 'Concentrated in London.' },
-      { name: 'Germany',  score: 92, pool: '~380k', pct: '~19% of EU', color_score: 92, note: 'Berlin and Munich are the primary hubs.' },
-      { name: 'France',   score: 72, pool: '~190k', pct: '~10% of EU', color_score: 72, note: 'Concentrated in Paris.' },
-      { name: 'Spain',    score: 68, pool: '~120k', pct: '~6% of EU',  color_score: 68, note: 'Barcelona and Madrid, with Barcelona ahead.' },
-      { name: 'Italy',    score: 48, pool: '~90k',  pct: '~5% of EU',  color_score: 48, note: 'Milan is the primary hub.' },
-      { name: 'Portugal', score: 38, pool: '~45k',  pct: '~2% of EU',  color_score: 38, note: 'Concentrated in Lisbon.' }
-    ]
+      { name: 'UK',       score: 95, pool: '~320k', pct: '~16% of EU', note: 'Primary hub: London (est. 65% of pool).' },
+      { name: 'Germany',  score: 92, pool: '~380k', pct: '~19% of EU', note: 'Primary hubs: Berlin, Munich (est. 55% of pool combined).' },
+      { name: 'France',   score: 72, pool: '~190k', pct: '~10% of EU', note: 'Primary hub: Paris (est. 75% of pool).' },
+      { name: 'Spain',    score: 68, pool: '~120k', pct: '~6% of EU',  note: 'Primary hubs: Barcelona, Madrid (est. 70% of pool combined).' },
+      { name: 'Italy',    score: 48, pool: '~90k',  pct: '~5% of EU',  note: 'Primary hub: Milan (est. 65% of pool).' },
+      { name: 'Portugal', score: 38, pool: '~45k',  pct: '~2% of EU',  note: 'Primary hub: Lisbon (est. 70% of pool).' },
+    ],
   },
   pm: {
     poolSize: '~520–650k PMs est. across Europe',
     source: 'LinkedIn global PM count (2.6M profiles, 2024); PM Job Market Insights 2024 (EU country share of open roles); LinkedIn EU job listings (~42k active PM roles, early 2025); Ravio compensation benchmarks 2025',
-    disclaimer: 'No public headcount dataset for PMs by country exists. European pool derived by applying Europe\'s ~20-25% share of LinkedIn\'s global PM count. Country estimates use each market\'s share of EU open PM roles as a proxy for talent distribution — a known approximation. Notable pools outside scope: Netherlands (Amsterdam, ~20-35k est.) and Sweden (Stockholm, ~20-35k est.) with outsized PM talent relative to country size.',
+    disclaimer: "No public headcount dataset for PMs by country exists. European pool derived by applying Europe's ~20–25% share of LinkedIn's global PM count. Country estimates use each market's share of EU open PM roles as a proxy for talent distribution — a known approximation. Notable pools outside scope: Netherlands (Amsterdam) and Sweden (Stockholm), each ~20–35k est.",
     countries: [
-      { name: 'UK',       score: 95, pool: '~130–160k', pct: '~25% of EU', color_score: 95, note: 'Concentrated in London.' },
-      { name: 'Germany',  score: 78, pool: '~65–85k',   pct: '~13% of EU', color_score: 78, note: 'Berlin and Munich are the primary hubs.' },
-      { name: 'France',   score: 70, pool: '~55–70k',   pct: '~11% of EU', color_score: 70, note: 'Concentrated in Paris.' },
-      { name: 'Spain',    score: 52, pool: '~30–45k',   pct: '~7% of EU',  color_score: 52, note: 'Barcelona ahead of Madrid.' },
-      { name: 'Italy',    score: 38, pool: '~20–30k',   pct: '~5% of EU',  color_score: 38, note: 'Milan is the primary hub.' },
-      { name: 'Portugal', score: 28, pool: '~6–10k',    pct: '~1% of EU',  color_score: 28, note: 'Concentrated in Lisbon.' }
-    ]
+      { name: 'UK',       score: 95, pool: '~130–160k', pct: '~25% of EU', note: 'Primary hub: London (est. 65% of pool).' },
+      { name: 'Germany',  score: 78, pool: '~65–85k',   pct: '~13% of EU', note: 'Primary hubs: Berlin, Munich (est. 60% of pool combined).' },
+      { name: 'France',   score: 70, pool: '~55–70k',   pct: '~11% of EU', note: 'Primary hub: Paris (est. 75% of pool).' },
+      { name: 'Spain',    score: 52, pool: '~30–45k',   pct: '~7% of EU',  note: 'Primary hubs: Barcelona, Madrid (est. 75% of pool combined).' },
+      { name: 'Italy',    score: 38, pool: '~20–30k',   pct: '~5% of EU',  note: 'Primary hub: Milan (est. 70% of pool).' },
+      { name: 'Portugal', score: 28, pool: '~6–10k',    pct: '~1% of EU',  note: 'Primary hub: Lisbon (est. 75% of pool).' },
+    ],
   },
   pd: {
     poolSize: '~150–250k product/UX designers est. across Europe',
-    source: 'Glassdoor May 2024 (open PD role counts by country); Eurostat 2024 ICT workforce ratios (used to estimate relative pool sizes where direct counts unavailable); QS World University Rankings by Subject 2024 (design school density)',
-    disclaimer: 'No public headcount dataset exists for product designers specifically. Pool estimates triangulated from open-role counts, ICT workforce share, and LinkedIn penetration data. Open-role counts reflect demand, not supply, and are not used as pool proxies. Notable pools outside scope: Netherlands (Amsterdam) and Sweden/Denmark each estimated at 15-25k — outsized relative to country size.',
+    source: 'Glassdoor May 2024 (open PD role counts by country); Eurostat 2024 ICT workforce ratios; QS World University Rankings by Subject 2024 (design school density)',
+    disclaimer: 'No public headcount dataset exists for product designers specifically. Pool estimates triangulated from open-role counts, ICT workforce share, and LinkedIn penetration data. Open-role counts reflect demand, not supply. Notable pools outside scope: Netherlands (Amsterdam) and Sweden/Denmark, each estimated at 15–25k.',
     countries: [
-      { name: 'UK',       score: 92, pool: '~45–65k', pct: '~27% of EU', color_score: 92, note: 'Concentrated in London.' },
-      { name: 'Germany',  score: 80, pool: '~40–55k', pct: '~23% of EU', color_score: 80, note: 'Berlin is the primary hub.' },
-      { name: 'France',   score: 65, pool: '~30–45k', pct: '~19% of EU', color_score: 65, note: 'Concentrated in Paris.' },
-      { name: 'Spain',    score: 62, pool: '~25–35k', pct: '~15% of EU', color_score: 62, note: 'Barcelona stronger than Madrid.' },
-      { name: 'Italy',    score: 45, pool: '~18–28k', pct: '~12% of EU', color_score: 45, note: 'Milan is the primary hub.' },
-      { name: 'Portugal', score: 30, pool: '~6–12k',  pct: '~4% of EU',  color_score: 30, note: 'Concentrated in Lisbon.' }
-    ]
+      { name: 'UK',       score: 92, pool: '~45–65k', pct: '~27% of EU', note: 'Primary hub: London (est. 65% of pool).' },
+      { name: 'Germany',  score: 80, pool: '~40–55k', pct: '~23% of EU', note: 'Primary hub: Berlin (est. 50% of pool).' },
+      { name: 'France',   score: 65, pool: '~30–45k', pct: '~19% of EU', note: 'Primary hub: Paris (est. 80% of pool).' },
+      { name: 'Spain',    score: 62, pool: '~25–35k', pct: '~15% of EU', note: 'Primary hubs: Barcelona, Madrid (est. 70% of pool combined).' },
+      { name: 'Italy',    score: 45, pool: '~18–28k', pct: '~12% of EU', note: 'Primary hub: Milan (est. 70% of pool).' },
+      { name: 'Portugal', score: 30, pool: '~6–12k',  pct: '~4% of EU',  note: 'Primary hub: Lisbon (est. 75% of pool).' },
+    ],
   },
   ae: {
-    poolSize: 'B2B SaaS AE pool not publicly quantified — percentages reflect estimated share of European quality supply',
+    poolSize: '~50–80k B2B SaaS AEs est. across Europe',
     source: 'Bluebird Recruitment 2025 SaaS Salary Benchmarks; Nobel Recruitment GTM Talent Search 2025; LinkedIn SaaS job opening distribution; Ravio compensation benchmarks 2025',
-    disclaimer: 'No public headcount dataset exists for B2B SaaS AEs by country. Relative rankings derived from SaaS ecosystem density, scaleup alumni base size, and specialist recruitment agency market coverage. Treat as directional, not quantitative. Notable pools outside scope: Netherlands (Amsterdam) and Ireland (Dublin) — disproportionately large SaaS AE pools due to major US SaaS HQ presence (Salesforce, HubSpot, Google).',
+    disclaimer: 'No public headcount dataset exists for B2B SaaS AEs by country. Pool size estimated from LinkedIn "Account Executive" profiles in Europe (~200k+) applying a ~25–40% B2B SaaS filter. Relative country rankings derived from SaaS ecosystem density, scaleup alumni base size, and specialist recruitment agency market coverage. Treat as directional. Notable pools outside scope: Netherlands (Amsterdam) and Ireland (Dublin) — disproportionately large pools due to major US SaaS HQ presence.',
     countries: [
-      { name: 'UK',       score: 98, pool: null, pct: '~40–50% of EU', color_score: 98, note: 'Concentrated in London.' },
-      { name: 'Germany',  score: 80, pool: null, pct: '~15–20% of EU', color_score: 80, note: 'Berlin and Munich are the primary hubs.' },
-      { name: 'France',   score: 62, pool: null, pct: '~10–15% of EU', color_score: 62, note: 'Concentrated in Paris.' },
-      { name: 'Spain',    score: 50, pool: null, pct: '~8–12% of EU',  color_score: 50, note: 'Barcelona and Madrid.' },
-      { name: 'Italy',    score: 32, pool: null, pct: '~4–6% of EU',   color_score: 32, note: 'Milan is the primary hub.' },
-      { name: 'Portugal', score: 25, pool: null, pct: '~2–4% of EU',   color_score: 25, note: 'Concentrated in Lisbon.' }
-    ]
-  }
+      { name: 'UK',       score: 98, pool: '~20–40k', pct: '~40–50% of EU', note: 'Primary hub: London (est. 75% of pool).' },
+      { name: 'Germany',  score: 80, pool: '~8–16k',  pct: '~15–20% of EU', note: 'Primary hubs: Berlin, Munich (est. 60% of pool combined).' },
+      { name: 'France',   score: 62, pool: '~5–12k',  pct: '~10–15% of EU', note: 'Primary hub: Paris (est. 80% of pool).' },
+      { name: 'Spain',    score: 50, pool: '~4–10k',  pct: '~8–12% of EU',  note: 'Primary hubs: Barcelona, Madrid (est. 75% of pool combined).' },
+      { name: 'Italy',    score: 32, pool: '~2–5k',   pct: '~4–6% of EU',   note: 'Primary hub: Milan (est. 75% of pool).' },
+      { name: 'Portugal', score: 25, pool: '~1–3k',   pct: '~2–4% of EU',   note: 'Primary hub: Lisbon (est. 80% of pool).' },
+    ],
+  },
 };
 
-function showRole(key) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => { if (b.getAttribute('onclick') === `showRole('${key}')`) b.classList.add('active'); });
-
-  const r = roles[key];
-  const maxScore = Math.max(...r.countries.map(c => c.score));
-
-  let html = `<div style="font-size:13px;color:#5a5a5a;background:#f8f8f7;border-radius:6px;padding:10px 14px;margin-bottom:16px;line-height:1.7">
-    <div style="margin-bottom:4px"><strong style="color:#3a3a3a">Estimated pool size:</strong> ${r.poolSize}</div>
-    <div style="margin-bottom:4px"><strong style="color:#3a3a3a">Sources:</strong> ${r.source}</div>
-    <div><strong style="color:#3a3a3a">Disclaimer:</strong> ${r.disclaimer}</div>
-  </div>`;
-
-  html += `<div class="section-title">Talent pool depth — Photoroom core markets</div>`;
-  r.countries.forEach(c => {
-    const pct = (c.score / maxScore * 100).toFixed(0);
-    const color = c.score >= 70 ? COLORS.high : c.score >= 45 ? COLORS.mid : COLORS.low;
-    const label = c.pool ? `${c.pool} · ${c.pct}` : c.pct;
-    html += `<div class="country-row">
-      <span class="country-label">${c.name}</span>
-      <div class="bar-wrap">
-        <div class="bar" style="width:${pct}%;background:${color}20;color:${color};">${label}</div>
-      </div>
-    </div>
-    <div class="note-row" style="margin-left:84px;margin-bottom:10px">${c.note}</div>`;
-  });
-
-  document.getElementById('role-content').innerHTML = html;
+function colorClass(score) {
+  if (score >= 70) return { bar: '#22c55e', badge: 'badge-green' };
+  if (score >= 45) return { bar: '#f59e0b', badge: 'badge-amber' };
+  return { bar: '#f43f5e', badge: 'badge-red' };
 }
-showRole('eng');
+
+let disclaimerOpen = false;
+
+function renderTabs(activeKey) {
+  const tabsEl = document.getElementById('tabs');
+  tabsEl.innerHTML = ROLES.map(r =>
+    `<button class="tab-btn${r.key === activeKey ? ' active' : ''}" onclick="render('${r.key}')">${r.label}</button>`
+  ).join('');
+}
+
+function renderInfo(role) {
+  const card = document.getElementById('info-card');
+  card.innerHTML = `
+    <div class="info-row"><span class="info-label">Pool size:</span><span class="info-value">${role.poolSize}</span></div>
+    <div class="info-row"><span class="info-label">Sources:</span><span class="info-value">${role.source}</span></div>
+    <div class="info-row disclaimer-row${disclaimerOpen ? ' open' : ''}"><span class="info-label">Disclaimer:</span><span class="info-value">${role.disclaimer}</span></div>
+    <button class="toggle-btn" onclick="toggleDisclaimer()">
+      <span id="toggle-icon">${disclaimerOpen ? '▲' : '▼'}</span>
+      <span id="toggle-text">${disclaimerOpen ? 'hide disclaimer' : 'show disclaimer'}</span>
+    </button>`;
+}
+
+function renderCountries(role) {
+  const maxScore = Math.max(...role.countries.map(c => c.score));
+  const list = document.getElementById('country-list');
+  list.innerHTML = role.countries.map(c => {
+    const barPct = (c.score / maxScore * 100).toFixed(1);
+    const { bar, badge } = colorClass(c.score);
+    return `
+      <div class="country-card">
+        <div class="country-top">
+          <span class="country-name">${c.name}</span>
+          <div class="country-nums">
+            ${c.pool ? `<span class="num-pool">${c.pool}</span>` : ''}
+            <span class="badge ${badge}">${c.pct}</span>
+          </div>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${barPct}%;background:${bar}"></div>
+        </div>
+        <div class="country-note">${c.note}</div>
+      </div>`;
+  }).join('');
+}
+
+let activeKey = 'eng';
+
+function render(key) {
+  activeKey = key;
+  const role = data[key];
+  renderTabs(key);
+  renderInfo(role);
+  renderCountries(role);
+}
+
+function toggleDisclaimer() {
+  disclaimerOpen = !disclaimerOpen;
+  render(activeKey);
+}
+
+render('eng');
 </script>
+</body>
+</html>
