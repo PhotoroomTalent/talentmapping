@@ -1,0 +1,121 @@
+
+<style>
+.tab-btn { background: none; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 6px 14px; font-size: 13px; cursor: pointer; color: var(--color-text-secondary); }
+.tab-btn.active { background: var(--color-background-info); color: var(--color-text-info); border-color: var(--color-border-info); }
+.country-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.bar-wrap { flex: 1; background: var(--color-background-secondary); border-radius: 4px; height: 22px; overflow: hidden; }
+.bar { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 500; white-space: nowrap; transition: width 0.4s ease; }
+.country-label { width: 74px; font-size: 13px; color: var(--color-text-secondary); text-align: right; flex-shrink: 0; }
+.val-label { width: 50px; font-size: 12px; color: var(--color-text-secondary); flex-shrink: 0; }
+.tier-badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; flex-shrink: 0; }
+.note-row { font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.5; }
+.section-title { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin: 18px 0 10px; }
+</style>
+
+<div style="padding: 4px 0 0;">
+  <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px;">
+    <button class="tab-btn active" onclick="showRole('eng')">Frontend engineer</button>
+    <button class="tab-btn" onclick="showRole('pm')">Product manager</button>
+    <button class="tab-btn" onclick="showRole('pd')">Product designer</button>
+    <button class="tab-btn" onclick="showRole('ae')">Account executive</button>
+  </div>
+  <div id="role-content"></div>
+</div>
+
+<script>
+const COLORS = {
+  high: '#1D9E75',
+  mid:  '#BA7517',
+  low:  '#D85A30'
+};
+const TIER_STYLE = {
+  '★★★': { bg: '#E1F5EE', color: '#0F6E56' },
+  '★★☆': { bg: '#FAEEDA', color: '#633806' },
+  '★☆☆': { bg: '#FAECE7', color: '#993C1D' }
+};
+
+const roles = {
+  eng: {
+    title: 'Frontend engineer (React/TypeScript)',
+    summary: 'Europe has ~6M developers. UK and Germany dominate absolute pool size. Spain growing fast, France solid, Italy and Portugal smaller but genuine.',
+    countries: [
+      { name: 'UK',       score: 95, label: '~840k devs total', tier: '★★★', note: 'Largest English-speaking pool in Europe. Dense in London. Strong React ecosystem. Most active on LinkedIn. High competition = higher comp.' },
+      { name: 'Germany',  score: 92, label: '~900k devs total', tier: '★★★', note: 'Largest absolute pool. Berlin and Munich are React/TS hubs. German-language barrier for some roles. Compensation pressure rising.' },
+      { name: 'France',   score: 72, label: '~300k devs est.',  tier: '★★☆', note: 'Paris tech scene strong. Good engineering schools (42, EPFL grads). Talent pool improving; historically underrepresented on LinkedIn vs actual size.' },
+      { name: 'Spain',    score: 68, label: '~300k+ devs est.', tier: '★★☆', note: 'Barcelona and Madrid growing fast. Healthy developer community; Spain 5.6% of global dev hires in 2024. 41-52% of firms struggle to find talent = competitive.' },
+      { name: 'Italy',    score: 48, label: '~200k devs est.',  tier: '★★☆', note: 'Milan primary hub. Smaller than FR/ES but not trivial. LinkedIn penetration lower. React/TS talent exists but pool is thinner at senior level.' },
+      { name: 'Portugal', score: 38, label: '~100k devs est.',  tier: '★☆☆', note: 'Lisbon a rising SaaS hub. Pool small but talent is active and internationally oriented. 56-65% of firms report shortages — tight market.' }
+    ],
+    restOfEurope: 'Largest pools outside Photoroom countries: Poland (~500k), Netherlands (~250k), Sweden, Romania, Ukraine. Not in scope but worth tracking as future exceptions.'
+  },
+  pm: {
+    title: 'Product manager',
+    summary: 'PM talent in Europe clusters even more tightly than engineering — London is the clear dominant hub, followed by Paris and Berlin. Southern Europe lags significantly.',
+    countries: [
+      { name: 'UK',       score: 95, label: 'Very large pool',  tier: '★★★', note: 'London is the PM capital of Europe. Dense fintech, SaaS, consumer tech scenes generate career PMs. English fluency advantage. High comp expectations.' },
+      { name: 'Germany',  score: 78, label: 'Large pool',       tier: '★★★', note: 'Berlin and Munich strong. PM culture maturing but still more engineering-led than UK/US. Growing pipeline from scaleups (Zalando, Delivery Hero, etc.).' },
+      { name: 'France',   score: 70, label: 'Solid pool',       tier: '★★☆', note: 'Paris tech ecosystem (Doctolib, Ledger, Contentsquare alumni) growing PM talent supply. Language can be a barrier for English-first companies.' },
+      { name: 'Spain',    score: 52, label: 'Moderate pool',    tier: '★★☆', note: 'Barcelona ahead of Madrid. English proficiency varies. Fewer PM "alumni networks" than UK/DE/FR. Market improving but still emerging.' },
+      { name: 'Italy',    score: 38, label: 'Smaller pool',     tier: '★☆☆', note: 'Milan has the most. Limited English-first PM culture. Senior PMs with SaaS experience relatively scarce. Expect longer time-to-fill.' },
+      { name: 'Portugal', score: 28, label: 'Limited pool',     tier: '★☆☆', note: 'Lisbon growing as a startup hub but PM talent pipeline is nascent. Many senior PMs are expats. Small domestic senior talent base.' }
+    ],
+    restOfEurope: 'Netherlands (Amsterdam) and Sweden (Stockholm) have outsized PM talent relative to country size. Notable SaaS PM alumni networks worth monitoring for exceptions.'
+  },
+  pd: {
+    title: 'Product designer',
+    summary: 'Design talent concentrates in the same cities as PM. UK leads, with Germany and the Netherlands close behind. Spain is improving with 6 universities in QS design top 250.',
+    countries: [
+      { name: 'UK',       score: 92, label: 'Largest EU pool',  tier: '★★★', note: 'London is a global design hub, especially for fintech and digital product. Strong agency-to-in-house pipeline. Salary expectations premium vs rest of Europe.' },
+      { name: 'Germany',  score: 80, label: 'Strong pool',      tier: '★★★', note: 'Berlin a recognised design hub. High demand from incumbents and scaleups. Talent density growing. Salaries rising particularly in senior roles.' },
+      { name: 'France',   score: 65, label: 'Good pool',        tier: '★★☆', note: 'Paris strong in brand and digital product design. Active community but smaller than UK/DE. LinkedIn penetration lower than actual market size suggests.' },
+      { name: 'Spain',    score: 62, label: 'Growing pool',     tier: '★★☆', note: '800k+ citizens with ICT skills; 6 design schools in QS top 250. Barcelona stronger than Madrid. Market growing — positive economic indicators for tech in 2024-25.' },
+      { name: 'Italy',    score: 45, label: 'Moderate pool',    tier: '★★☆', note: 'Milan has design history but product design (vs brand/graphic) is less developed. Growing number of product design bootcamp graduates improving pipeline.' },
+      { name: 'Portugal', score: 30, label: 'Small pool',       tier: '★☆☆', note: 'Active design community in Lisbon but small. Many designers are generalists rather than product specialists. Senior product designers often expats.' }
+    ],
+    restOfEurope: 'Netherlands (Amsterdam) punches well above its weight in UX/product design. Sweden and Denmark also strong. Worth considering if a design-specific exception arises.'
+  },
+  ae: {
+    title: 'Account executive (B2B SaaS)',
+    summary: 'Sales talent is the most geographically concentrated of all four roles — English fluency, SaaS culture and market maturity matter enormously. UK is dominant, Germany rising.',
+    countries: [
+      { name: 'UK',       score: 98, label: 'Dominant hub',     tier: '★★★', note: 'London is the B2B SaaS sales capital of Europe. Deep bench of enterprise AEs from Salesforce, HubSpot, etc. English fluency. Highest OTE expectations but matching talent density.' },
+      { name: 'Germany',  score: 80, label: 'Strong hub',       tier: '★★★', note: 'Berlin and Munich seeing sharp rise in AE comp and supply. DACH market experience valuable. Language split: some AEs cover DACH, others English-only. Growing scaleup alumni base.' },
+      { name: 'France',   score: 62, label: 'Solid pool',       tier: '★★☆', note: 'Paris SaaS scene (Salesforce, HubSpot offices) creating pipeline. Mostly covers French-speaking markets. English-first SaaS AEs exist but narrower pool.' },
+      { name: 'Spain',    score: 50, label: 'Moderate pool',    tier: '★★☆', note: 'Barcelona and Madrid growing. SaaS culture developing. Best for EMEA-South coverage roles. LinkedIn lists Lisbon/Madrid as SaaS hubs of note. Comp lower = more accessible.' },
+      { name: 'Italy',    score: 32, label: 'Limited pool',     tier: '★☆☆', note: 'Milan primary market. Limited B2B SaaS AE pipeline vs market size. Most experienced AEs are from US company local offices. Niche roles will struggle.' },
+      { name: 'Portugal', score: 25, label: 'Nascent pool',     tier: '★☆☆', note: 'Lisbon growing as EU SaaS hub for US companies, but AE talent is mostly expat or entry-level. Senior B2B SaaS closers are rare. High risk of long time-to-fill.' }
+    ],
+    restOfEurope: 'Netherlands (Amsterdam) and Ireland (Dublin) have disproportionately large SaaS AE pools given country size — major US SaaS HQs based there. Strong exception candidates.'
+  }
+};
+
+function showRole(key) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => { if (b.getAttribute('onclick') === `showRole('${key}')`) b.classList.add('active'); });
+
+  const r = roles[key];
+  const maxScore = Math.max(...r.countries.map(c => c.score));
+  let html = `<div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:16px;line-height:1.6">${r.summary}</div>`;
+
+  html += `<div class="section-title">Talent pool depth — Photoroom core markets</div>`;
+  r.countries.forEach(c => {
+    const pct = (c.score / maxScore * 100).toFixed(0);
+    const color = c.score >= 70 ? COLORS.high : c.score >= 45 ? COLORS.mid : COLORS.low;
+    const ts = TIER_STYLE[c.tier];
+    html += `<div class="country-row">
+      <span class="country-label">${c.name}</span>
+      <div class="bar-wrap">
+        <div class="bar" style="width:${pct}%;background:${color}20;color:${color};">${c.label}</div>
+      </div>
+      <span class="tier-badge" style="background:${ts.bg};color:${ts.color}">${c.tier}</span>
+    </div>
+    <div class="note-row" style="margin-left:84px;margin-bottom:10px">${c.note}</div>`;
+  });
+
+  html += `<div class="section-title">Rest of Europe — context</div>`;
+  html += `<div style="font-size:13px;color:var(--color-text-secondary);line-height:1.6;padding:10px 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md)">${r.restOfEurope}</div>`;
+
+  document.getElementById('role-content').innerHTML = html;
+}
+showRole('eng');
+</script>
